@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2b1e16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reset">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%232b1e16'/><circle cx='50' cy='50' r='22' fill='none' stroke='%23d9a441' stroke-width='3'/><circle cx='50' cy='50' r='6' fill='%23d9a441'/></svg>">
+<title>Reset — Kyle's Emergency Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1f160f;
+    --bg-raised: #2b1e16;
+    --bg-card: #3a291e;
+    --cream: #f5ebdc;
+    --cream-dim: #d9cdb8;
+    --cream-faint: #a89a82;
+    --amber: #d9a441;
+    --amber-soft: #b8863a;
+    --terracotta: #c26a4f;
+    --sage: #8aa287;
+    --border: rgba(245, 235, 220, 0.08);
+    --border-strong: rgba(245, 235, 220, 0.16);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--cream);
+    line-height: 1.6;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-image:
+      radial-gradient(ellipse at top, rgba(217, 164, 65, 0.08), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(194, 106, 79, 0.05), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+  }
+
+  /* ============ SCREENS ============ */
+  .screen { display: none; animation: fadeIn 0.5s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ BREATHING SCREEN ============ */
+  .breathing-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+  }
+  .breathing-screen.active { display: flex; }
+
+  .breath-greeting {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(28px, 6vw, 38px);
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+
+  .breath-subtitle {
+    color: var(--cream-faint);
+    font-size: 15px;
+    margin-bottom: 48px;
+    max-width: 380px;
+    line-height: 1.5;
+  }
+
+  .breath-circle-wrap {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+
+  .breath-circle {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217, 164, 65, 0.25), rgba(217, 164, 65, 0.05));
+    border: 1.5px solid rgba(217, 164, 65, 0.4);
+    transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.75);
+  }
+
+  .breath-circle.inhale { transform: scale(1.3); transition-duration: 4s; }
+  .breath-circle.hold { transform: scale(1.3); transition-duration: 0.5s; }
+  .breath-circle.exhale { transform: scale(0.75); transition-duration: 6s; }
+
+  .breath-label {
+    position: relative;
+    z-index: 2;
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: 0.02em;
+  }
+
+  .breath-timer {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--cream-faint);
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  .breath-skip {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--cream-dim);
+    border-radius: 999px;
+    font-size: 13px;
+    font-family: var(--sans);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.4s ease, background 0.2s ease;
+    letter-spacing: 0.02em;
+  }
+
+  .breath-skip.visible { opacity: 1; }
+  .breath-skip:hover, .breath-skip:active { background: rgba(245, 235, 220, 0.06); }
+
+  .breath-note {
+    margin-top: 32px;
+    max-width: 320px;
+    color: var(--cream-faint);
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* ============ HOME / MODE SELECT ============ */
+  .home-header {
+    margin-bottom: 28px;
+    padding-top: 8px;
+  }
+
+  .home-eyebrow {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--amber);
+    margin-bottom: 10px;
+  }
+
+  .home-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(30px, 6vw, 40px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  .home-title em {
+    font-style: italic;
+    color: var(--amber);
+    font-weight: 400;
+  }
+
+  .home-sub {
+    color: var(--cream-faint);
+    font-size: 15px;
+    line-height: 1.55;
+    max-width: 480px;
+  }
+
+  .mode-grid {
+    display: grid;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .mode-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.15s ease, background 0.2s ease;
+    text-align: left;
+    width: 100%;
+    font-family: inherit;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mode-card:hover, .mode-card:active {
+    border-color: var(--amber-soft);
+    background: var(--bg-card);
+    transform: translateY(-1px);
+  }
+
+  .mode-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(217, 164, 65, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .mode-body { flex: 1; min-width: 0; }
+
+  .mode-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--cream);
+    margin-bottom: 3px;
+    letter-spacing: -0.01em;
+  }
+
+  .mode-desc {
+    font-size: 13px;
+    color: var(--cream-faint);
+    line-height: 1.45;
+  }
+
+  .mode-arrow {
+    color: var(--cream-faint);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* ============ MODE SCREENS ============ */
+  .mode-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-top: 4px;
+  }
+
+  .back-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--cream-dim);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+  }
+
+  .back-btn:hover, .back-btn:active { background: rgba(245, 235, 220, 0.06); }
+
+  .mode-heading {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .mode-heading em { font-style: italic; color: var(--amber); font-weight: 400; }
+
+  .step-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 14px;
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--amber);
+    color: var(--bg);
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 13px;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  .step-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--cream);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+  }
+
+  .step-title-text { vertical-align: middle; }
+
+  .step-prompt {
+    color: var(--cream-dim);
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+
+  .step-prompt em {
+    color: var(--amber);
+    font-style: italic;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s ease;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--amber-soft);
+  }
+
+  textarea::placeholder { color: var(--cream-faint); opacity: 0.6; }
+
+  .twocol {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .twocol label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cream-faint);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .twocol.tri {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .pill {
+    padding: 8px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--cream-dim);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.15s ease;
+  }
+
+  .pill:hover, .pill:active {
+    border-color: var(--amber-soft);
+    color: var(--cream);
+  }
+
+  .pill.active {
+    background: rgba(217, 164, 65, 0.15);
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  /* Slider for belief rating */
+  .slider-wrap { margin-top: 12px; }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--cream-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .slider-value {
+    font-family: var(--serif);
+    color: var(--amber);
+    font-size: 22px;
+    margin-left: 8px;
+  }
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--amber);
+    cursor: pointer;
+    border: 3px solid var(--bg-raised);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--amber);
+    cursor: pointer;
+    border: 3px solid var(--bg-raised);
+  }
+
+  /* ============ ACTION BUTTONS ============ */
+  .action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+    padding-bottom: 20px;
+  }
+
+  .btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s ease, background 0.2s ease;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary {
+    background: var(--amber);
+    color: var(--bg);
+  }
+  .btn-primary:hover, .btn-primary:active {
+    background: #e6b352;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--cream-dim);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-secondary:hover, .btn-secondary:active {
+    background: rgba(245, 235, 220, 0.04);
+    color: var(--cream);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--cream-faint);
+    border: none;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  /* ============ PANIC BUTTON ============ */
+  .panic-btn {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--terracotta);
+    color: var(--cream);
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+  }
+  .panic-btn.visible { display: flex; }
+  .panic-btn:hover, .panic-btn:active { transform: scale(1.05); }
+
+  /* ============ TOAST ============ */
+  .toast {
+    position: fixed;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-card);
+    color: var(--cream);
+    padding: 12px 20px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ============ HISTORY LINK ============ */
+  .footer-link {
+    text-align: center;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-link a, .footer-link button {
+    color: var(--cream-faint);
+    font-size: 12px;
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+  .footer-link a:hover, .footer-link button:hover { color: var(--amber); }
+
+  /* History modal */
+  .history-list { margin-top: 20px; }
+  .history-item {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .history-date {
+    font-size: 11px;
+    color: var(--cream-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .history-mode {
+    font-family: var(--serif);
+    color: var(--amber);
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  .history-content {
+    color: var(--cream-dim);
+    font-size: 13px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--cream-faint);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  /* Values chip for decision mode */
+  .values-box {
+    background: rgba(138, 162, 135, 0.08);
+    border: 1px solid rgba(138, 162, 135, 0.25);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 12px;
+  }
+  .values-box strong {
+    color: var(--sage);
+    font-family: var(--serif);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Small nudge card for completion */
+  .complete-card {
+    background: linear-gradient(135deg, rgba(217, 164, 65, 0.12), rgba(194, 106, 79, 0.08));
+    border: 1px solid rgba(217, 164, 65, 0.3);
+    border-radius: 16px;
+    padding: 22px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .complete-card h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--cream);
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .complete-card p {
+    color: var(--cream-dim);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 420px) {
+    .twocol { grid-template-columns: 1fr; }
+    .action-row .btn { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ BREATHING SCREEN (forced entry) ============ -->
+<div id="breathing-screen" class="breathing-screen active">
+  <div class="breath-greeting">You're here. That's the hard part.</div>
+  <div class="breath-subtitle">Before anything else — 60 seconds. Let your body arrive before your brain.</div>
+
+  <div class="breath-circle-wrap">
+    <div id="breath-circle" class="breath-circle"></div>
+    <div id="breath-label" class="breath-label">Breathe in</div>
+  </div>
+
+  <div class="breath-timer"><span id="breath-count">60</span>s</div>
+  <button id="skip-btn" class="breath-skip" onclick="showHome()">I'm regulated — continue →</button>
+
+  <div class="breath-note">
+    Inhale 4, exhale 6. The long exhale activates your parasympathetic nervous system — this is biology, not willpower.
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ============ HOME ============ -->
+<div id="home-screen" class="screen">
+  <div class="home-header">
+    <span class="home-eyebrow">Emergency Dashboard</span>
+    <h1 class="home-title">Your nervous system is <em>online</em>. Now — what's happening?</h1>
+    <p class="home-sub">Pick the closest match. You can always switch modes. Nothing here is logged unless you press save.</p>
+  </div>
+
+  <div class="mode-grid">
+    <button class="mode-card" onclick="showMode('rsd')">
+      <div class="mode-icon">🌀</div>
+      <div class="mode-body">
+        <div class="mode-title">RSD Spiral</div>
+        <div class="mode-desc">Keith is in the room — walk him out</div>
+      </div>
+      <div class="mode-arrow">→</div>
+    </button>
+
+    <button class="mode-card" onclick="showMode('decision')">
+      <div class="mode-icon">⚖️</div>
+      <div class="mode-body">
+        <div class="mode-title">Decision Paralysis</div>
+        <div class="mode-desc">Stuck between options, brain won't pick</div>
+      </div>
+      <div class="mode-arrow">→</div>
+    </button>
+
+    <button class="mode-card" onclick="showMode('critic')">
+      <div class="mode-icon">🪞</div>
+      <div class="mode-body">
+        <div class="mode-title">Self-Criticism</div>
+        <div class="mode-desc">Being hard on yourself — separate true from not-true</div>
+      </div>
+      <div class="mode-arrow">→</div>
+    </button>
+
+    <button class="mode-card" onclick="showMode('ignition')">
+      <div class="mode-icon">🔑</div>
+      <div class="mode-body">
+        <div class="mode-title">Task Initiation</div>
+        <div class="mode-desc">Ignition misfire — can't start even though you want to</div>
+      </div>
+      <div class="mode-arrow">→</div>
+    </button>
+
+    <button class="mode-card" onclick="showMode('overwhelm')">
+      <div class="mode-icon">🌊</div>
+      <div class="mode-body">
+        <div class="mode-title">Overwhelm</div>
+        <div class="mode-desc">Everything at once — dump it, pick one</div>
+      </div>
+      <div class="mode-arrow">→</div>
+    </button>
+  </div>
+
+  <div class="footer-link">
+    <button onclick="showHistory()">View Saved Entries</button>
+  </div>
+</div>
+
+<!-- ============ RSD MODE ============ -->
+<div id="rsd-screen" class="screen">
+  <div class="mode-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <h2 class="mode-heading">RSD <em>Spiral</em></h2>
+  </div>
+
+  <div class="step-card">
+    <div class="complete-card" style="margin: 0;">
+      <h3>Keith is in the room.</h3>
+      <p>You didn't invite him. He's not you. He's the voice that shows up when RSD hits — the one that's hard on you, catastrophizes, and speaks in absolutes. The goal here isn't to fight him. It's to notice him, sort what he's saying, and walk him back out.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">1</span><span class="step-title-text">What is Keith saying?</span></div>
+    <p class="step-prompt">Recognize the script. You've heard it before — it's not fresh truth.</p>
+    <div class="pill-row">
+      <button class="pill" onclick="togglePill(this)">Nobody likes me</button>
+      <button class="pill" onclick="togglePill(this)">I've ruined it</button>
+      <button class="pill" onclick="togglePill(this)">They're mad at me</button>
+      <button class="pill" onclick="togglePill(this)">I'm too much</button>
+      <button class="pill" onclick="togglePill(this)">I'm not enough</button>
+      <button class="pill" onclick="togglePill(this)">I'll be exposed</button>
+    </div>
+    <textarea id="rsd-script" placeholder="Or type exactly what Keith is telling you..." rows="2" style="margin-top: 10px;"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">2</span><span class="step-title-text">How loud is Keith?</span></div>
+    <p class="step-prompt">Rate how much you're believing him right now.</p>
+    <div class="slider-wrap">
+      <div class="slider-labels">
+        <span>Barely</span>
+        <span>Totally</span>
+      </div>
+      <input type="range" id="rsd-belief" min="0" max="100" value="80" oninput="document.getElementById('rsd-belief-val').textContent = this.value + '%'">
+      <div style="text-align: center; margin-top: 8px;"><span id="rsd-belief-val" class="slider-value">80%</span></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">3</span><span class="step-title-text">Evidence check</span></div>
+    <p class="step-prompt">Keith deals in feelings. Walk him out with facts. Observable only — not mind-reading, not vibes.</p>
+    <div class="twocol tri">
+      <div>
+        <label>What Keith would point to</label>
+        <textarea id="rsd-for" placeholder="Any actual facts that back him up..." rows="3"></textarea>
+      </div>
+      <div>
+        <label>What Keith is ignoring</label>
+        <textarea id="rsd-against" placeholder="Facts that contradict him..." rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">4</span><span class="step-title-text">Friend reframe</span></div>
+    <p class="step-prompt">If Jyselle — or a nurse you care about — were hearing Keith's script about herself, what would you tell her?</p>
+    <textarea id="rsd-friend" placeholder="In your voice, to someone you love..." rows="3"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">5</span><span class="step-title-text">Walk Keith out. One small action.</span></div>
+    <p class="step-prompt">You don't have to win the argument with him. You just have to act like the person you're becoming — the financial educator, the partner, the son — for the next 10 minutes.</p>
+    <textarea id="rsd-action" placeholder="The next 10-minute action..." rows="2"></textarea>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="saveEntry('rsd')">Save Locally</button>
+    <button class="btn btn-secondary" onclick="copyForNotion('rsd')">Copy for Notion</button>
+    <button class="btn btn-ghost" onclick="showHome()">Back</button>
+  </div>
+</div>
+
+<!-- ============ DECISION MODE ============ -->
+<div id="decision-screen" class="screen">
+  <div class="mode-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <h2 class="mode-heading">Decision <em>Paralysis</em></h2>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">1</span><span class="step-title-text">Name the decision</span></div>
+    <p class="step-prompt">One sentence. What's the choice?</p>
+    <textarea id="dec-question" placeholder="Should I... / Do I... / Which option..." rows="2"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">2</span><span class="step-title-text">Pros & Cons</span></div>
+    <div class="twocol">
+      <div>
+        <label>Pros</label>
+        <textarea id="dec-pros" placeholder="Why yes..." rows="5"></textarea>
+      </div>
+      <div>
+        <label>Cons</label>
+        <textarea id="dec-cons" placeholder="Why no..." rows="5"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">3</span><span class="step-title-text">Values check</span></div>
+    <div class="values-box">
+      <strong>The question that cuts through:</strong>
+      Which option is the version of me I'm trying to become more likely to choose — the financial educator, the partner to Jyselle, the son, the future father?
+    </div>
+    <textarea id="dec-values" placeholder="The version of me I'm becoming would..." rows="3" style="margin-top: 12px;"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">4</span><span class="step-title-text">The 10/10/10 test</span></div>
+    <p class="step-prompt">Will this matter in <em>10 minutes</em>, <em>10 months</em>, <em>10 years</em>?</p>
+    <textarea id="dec-10" placeholder="Quick gut answer..." rows="2"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">5</span><span class="step-title-text">Pick. You can course-correct.</span></div>
+    <p class="step-prompt">A made decision beats a perfect one. Most decisions are reversible.</p>
+    <textarea id="dec-choice" placeholder="I'm choosing..." rows="2"></textarea>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="saveEntry('decision')">Save Locally</button>
+    <button class="btn btn-secondary" onclick="copyForNotion('decision')">Copy for Notion</button>
+    <button class="btn btn-ghost" onclick="showHome()">Back</button>
+  </div>
+</div>
+
+<!-- ============ SELF-CRITICISM MODE ============ -->
+<div id="critic-screen" class="screen">
+  <div class="mode-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <h2 class="mode-heading">Self-<em>Criticism</em></h2>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">1</span><span class="step-title-text">What you're saying to yourself</span></div>
+    <p class="step-prompt">Write it raw. Exactly as it sounds in your head.</p>
+    <textarea id="cr-raw" placeholder="The voice in my head is saying..." rows="4"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">2</span><span class="step-title-text">True vs. Not True</span></div>
+    <p class="step-prompt">Sort the thought. Feelings aren't facts.</p>
+    <div class="twocol">
+      <div>
+        <label>What IS true</label>
+        <textarea id="cr-true" placeholder="Observable, factual..." rows="5"></textarea>
+      </div>
+      <div>
+        <label>What is NOT true</label>
+        <textarea id="cr-nottrue" placeholder="Distortion, story, exaggeration..." rows="5"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">3</span><span class="step-title-text">Common humanity</span></div>
+    <p class="step-prompt">Other people — other nurses, other ADHD brains — feel this too. You're not alone in it.</p>
+    <textarea id="cr-human" placeholder="Other people in my situation also feel..." rows="2"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">4</span><span class="step-title-text">Self-compassion reframe</span></div>
+    <p class="step-prompt">Hand over heart. Say it out loud if you can. What would kindness sound like?</p>
+    <textarea id="cr-kind" placeholder="This is a painful moment. I hurt because I care..." rows="3"></textarea>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="saveEntry('critic')">Save Locally</button>
+    <button class="btn btn-secondary" onclick="copyForNotion('critic')">Copy for Notion</button>
+    <button class="btn btn-ghost" onclick="showHome()">Back</button>
+  </div>
+</div>
+
+<!-- ============ TASK INITIATION MODE ============ -->
+<div id="ignition-screen" class="screen">
+  <div class="mode-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <h2 class="mode-heading">Ignition <em>Misfire</em></h2>
+  </div>
+
+  <div class="step-card">
+    <div class="complete-card" style="margin: 0 0 16px;">
+      <h3>The car runs fine.</h3>
+      <p>The engine just won't turn over. Not lazy. Not broken. Misfiring. We fix this with <em>a smaller spark</em>, not more willpower.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">1</span><span class="step-title-text">The task you can't start</span></div>
+    <textarea id="ig-task" placeholder="The thing I'm avoiding..." rows="2"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">2</span><span class="step-title-text">Shrink it</span></div>
+    <p class="step-prompt">What's the smallest possible first move? Not the task — the <em>ignition</em>.</p>
+    <div class="pill-row">
+      <button class="pill" onclick="togglePill(this)">Open the doc</button>
+      <button class="pill" onclick="togglePill(this)">Type one sentence</button>
+      <button class="pill" onclick="togglePill(this)">Send the first message</button>
+      <button class="pill" onclick="togglePill(this)">Put on shoes</button>
+      <button class="pill" onclick="togglePill(this)">Set 2-min timer</button>
+    </div>
+    <textarea id="ig-shrink" placeholder="Or: the smallest possible first move is..." rows="2" style="margin-top: 10px;"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">3</span><span class="step-title-text">Environment shift</span></div>
+    <p class="step-prompt">Body doubling, location change, or sound — pick one.</p>
+    <div class="pill-row">
+      <button class="pill" onclick="togglePill(this)">Text someone I'm starting</button>
+      <button class="pill" onclick="togglePill(this)">Move to different room</button>
+      <button class="pill" onclick="togglePill(this)">Put on working music</button>
+      <button class="pill" onclick="togglePill(this)">Stand up & work</button>
+      <button class="pill" onclick="togglePill(this)">Open a coworking stream</button>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">4</span><span class="step-title-text">The 2-minute rule</span></div>
+    <p class="step-prompt">Commit to 2 minutes only. If after 2 minutes you want to stop — you can. But you almost never will.</p>
+    <button class="btn btn-primary" onclick="start2MinTimer()" id="ig-timer-btn" style="width: 100%; margin-top: 6px;">Start 2-min timer</button>
+    <div id="ig-timer-display" style="text-align: center; font-family: var(--serif); font-size: 32px; color: var(--amber); margin-top: 12px; display: none;"></div>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="saveEntry('ignition')">Save Locally</button>
+    <button class="btn btn-secondary" onclick="copyForNotion('ignition')">Copy for Notion</button>
+    <button class="btn btn-ghost" onclick="showHome()">Back</button>
+  </div>
+</div>
+
+<!-- ============ OVERWHELM MODE ============ -->
+<div id="overwhelm-screen" class="screen">
+  <div class="mode-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <h2 class="mode-heading">Over<em>whelm</em></h2>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">1</span><span class="step-title-text">Dump it all</span></div>
+    <p class="step-prompt">Every thing in your head. No order. No filter. Just evacuate.</p>
+    <textarea id="ov-dump" placeholder="Everything swirling right now..." rows="10"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">2</span><span class="step-title-text">Circle the urgent</span></div>
+    <p class="step-prompt">Of everything you dumped — which ones are actually urgent <em>today</em>? (Not "soon." Today.)</p>
+    <textarea id="ov-urgent" placeholder="Today-only..." rows="4"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">3</span><span class="step-title-text">Pick ONE thing</span></div>
+    <p class="step-prompt">Not the biggest. Not the most important. The <em>one</em> that, once done, takes the most weight off your chest.</p>
+    <textarea id="ov-one" placeholder="The one thing..." rows="2"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">4</span><span class="step-title-text">Everything else → TickTick</span></div>
+    <p class="step-prompt">The rest isn't gone. It's just not <em>now</em>. Drop it in your inbox later — not in your head.</p>
+    <a href="ticktick://" class="btn btn-secondary" style="display: inline-block; text-decoration: none; text-align: center;">Open TickTick</a>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="saveEntry('overwhelm')">Save Locally</button>
+    <button class="btn btn-secondary" onclick="copyForNotion('overwhelm')">Copy for Notion</button>
+    <button class="btn btn-ghost" onclick="showHome()">Back</button>
+  </div>
+</div>
+
+<!-- ============ HISTORY ============ -->
+<div id="history-screen" class="screen">
+  <div class="mode-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <h2 class="mode-heading">Saved <em>Entries</em></h2>
+  </div>
+  <div id="history-list" class="history-list"></div>
+</div>
+
+</div>
+
+<!-- Panic button -->
+<button id="panic-btn" class="panic-btn" onclick="goToBreathing()" title="Reset breathing">↻</button>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script>
+  // ============ BREATHING (forced 60s) ============
+  let breathSeconds = 60;
+  let breathTimer = null;
+  let breathPhaseTimer = null;
+
+  const phases = [
+    { label: 'Breathe in', cls: 'inhale', duration: 4000 },
+    { label: 'Hold', cls: 'hold', duration: 1000 },
+    { label: 'Breathe out', cls: 'exhale', duration: 6000 },
+    { label: 'Rest', cls: 'hold', duration: 1000 }
+  ];
+  let phaseIdx = 0;
+
+  function runBreathPhase() {
+    const p = phases[phaseIdx];
+    const circle = document.getElementById('breath-circle');
+    const label = document.getElementById('breath-label');
+    if (!circle || !label) return;
+    circle.className = 'breath-circle ' + p.cls;
+    label.textContent = p.label;
+    phaseIdx = (phaseIdx + 1) % phases.length;
+    breathPhaseTimer = setTimeout(runBreathPhase, p.duration);
+  }
+
+  function startBreathingTimer() {
+    runBreathPhase();
+    breathTimer = setInterval(() => {
+      breathSeconds--;
+      const countEl = document.getElementById('breath-count');
+      if (countEl) countEl.textContent = breathSeconds;
+      if (breathSeconds <= 45) {
+        const skip = document.getElementById('skip-btn');
+        if (skip) skip.classList.add('visible');
+      }
+      if (breathSeconds <= 0) {
+        clearInterval(breathTimer);
+        showHome();
+      }
+    }, 1000);
+  }
+
+  function goToBreathing() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const b = document.getElementById('breathing-screen');
+    b.classList.add('active');
+    document.getElementById('panic-btn').classList.remove('visible');
+    // reset
+    breathSeconds = 60;
+    phaseIdx = 0;
+    document.getElementById('breath-count').textContent = 60;
+    document.getElementById('skip-btn').classList.remove('visible');
+    if (breathTimer) clearInterval(breathTimer);
+    if (breathPhaseTimer) clearTimeout(breathPhaseTimer);
+    startBreathingTimer();
+  }
+
+  // ============ NAVIGATION ============
+  function showHome() {
+    if (breathTimer) clearInterval(breathTimer);
+    if (breathPhaseTimer) clearTimeout(breathPhaseTimer);
+    document.getElementById('breathing-screen').classList.remove('active');
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('home-screen').classList.add('active');
+    document.getElementById('panic-btn').classList.add('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showMode(mode) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(mode + '-screen').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showHistory() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('history-screen').classList.add('active');
+    renderHistory();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ============ PILLS ============
+  function togglePill(el) { el.classList.toggle('active'); }
+
+  function collectPills(stepCard) {
+    return Array.from(stepCard.querySelectorAll('.pill.active')).map(p => p.textContent.trim());
+  }
+
+  // ============ SAVE & COPY ============
+  function getEntryData(mode) {
+    const modeLabels = {
+      rsd: 'RSD Spiral',
+      decision: 'Decision Paralysis',
+      critic: 'Self-Criticism',
+      ignition: 'Task Initiation',
+      overwhelm: 'Overwhelm'
+    };
+    const now = new Date();
+    const dateStr = now.toLocaleString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: 'numeric', minute: '2-digit'
+    });
+
+    let data = { mode: modeLabels[mode], date: dateStr, timestamp: now.toISOString(), fields: {} };
+    const screen = document.getElementById(mode + '-screen');
+
+    if (mode === 'rsd') {
+      const scripts = collectPills(screen.querySelectorAll('.step-card')[1]);
+      data.fields.Script = [...scripts, document.getElementById('rsd-script').value].filter(Boolean).join(' | ');
+      data.fields['Belief %'] = document.getElementById('rsd-belief').value + '%';
+      data.fields['Supports it'] = document.getElementById('rsd-for').value;
+      data.fields['Contradicts it'] = document.getElementById('rsd-against').value;
+      data.fields['Friend reframe'] = document.getElementById('rsd-friend').value;
+      data.fields['Next action'] = document.getElementById('rsd-action').value;
+    } else if (mode === 'decision') {
+      data.fields['The decision'] = document.getElementById('dec-question').value;
+      data.fields['Pros'] = document.getElementById('dec-pros').value;
+      data.fields['Cons'] = document.getElementById('dec-cons').value;
+      data.fields['Values check'] = document.getElementById('dec-values').value;
+      data.fields['10/10/10 test'] = document.getElementById('dec-10').value;
+      data.fields['Choice'] = document.getElementById('dec-choice').value;
+    } else if (mode === 'critic') {
+      data.fields['Raw thought'] = document.getElementById('cr-raw').value;
+      data.fields['What IS true'] = document.getElementById('cr-true').value;
+      data.fields['What is NOT true'] = document.getElementById('cr-nottrue').value;
+      data.fields['Common humanity'] = document.getElementById('cr-human').value;
+      data.fields['Self-compassion'] = document.getElementById('cr-kind').value;
+    } else if (mode === 'ignition') {
+      const shrinks = collectPills(screen.querySelectorAll('.step-card')[2]);
+      const env = collectPills(screen.querySelectorAll('.step-card')[3]);
+      data.fields['The task'] = document.getElementById('ig-task').value;
+      data.fields['Smallest first move'] = [...shrinks, document.getElementById('ig-shrink').value].filter(Boolean).join(' | ');
+      data.fields['Environment shift'] = env.join(', ');
+    } else if (mode === 'overwhelm') {
+      data.fields['Brain dump'] = document.getElementById('ov-dump').value;
+      data.fields['Urgent today'] = document.getElementById('ov-urgent').value;
+      data.fields['The ONE thing'] = document.getElementById('ov-one').value;
+    }
+
+    return data;
+  }
+
+  function saveEntry(mode) {
+    const data = getEntryData(mode);
+    const existing = JSON.parse(localStorage.getItem('kyle-ed-entries') || '[]');
+    existing.unshift(data);
+    if (existing.length > 50) existing.pop();
+    localStorage.setItem('kyle-ed-entries', JSON.stringify(existing));
+    toast('Saved locally ✓');
+  }
+
+  function formatForNotion(data) {
+    const nl = '\n';
+    const safe = (v) => (v || '').toString().replace(/\|/g, '\\|').replace(/\n+/g, ' ');
+
+    let out = '';
+    out += `# 🚨 ${data.mode} — ${data.date}` + nl + nl;
+
+    // Mode-specific "T-table" or two-column tables where it fits naturally
+    if (data.mode === 'RSD Spiral') {
+      // Evidence T-table first (this is the visual Kyle specifically asked for)
+      const f = data.fields;
+      out += `## Keith vs. The Facts` + nl + nl;
+      out += `| What Keith says | What Keith ignores |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| ${safe(f['Supports it']) || '—'} | ${safe(f['Contradicts it']) || '—'} |` + nl + nl;
+
+      out += `## The Full Log` + nl + nl;
+      out += `| Field | Entry |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| Script | ${safe(f['Script'])} |` + nl;
+      out += `| How loud is Keith | ${safe(f['Belief %'])} |` + nl;
+      out += `| Friend reframe | ${safe(f['Friend reframe'])} |` + nl;
+      out += `| Walk-him-out action | ${safe(f['Next action'])} |` + nl;
+    }
+    else if (data.mode === 'Decision Paralysis') {
+      const f = data.fields;
+      out += `## The Decision` + nl + nl;
+      out += `> ${safe(f['The decision']) || '—'}` + nl + nl;
+
+      out += `## Pros vs. Cons` + nl + nl;
+      out += `| Pros | Cons |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| ${safe(f['Pros']) || '—'} | ${safe(f['Cons']) || '—'} |` + nl + nl;
+
+      out += `## Gut Checks` + nl + nl;
+      out += `| Check | Answer |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| Values check | ${safe(f['Values check'])} |` + nl;
+      out += `| 10/10/10 test | ${safe(f['10/10/10 test'])} |` + nl;
+      out += `| **Choice** | **${safe(f['Choice'])}** |` + nl;
+    }
+    else if (data.mode === 'Self-Criticism') {
+      const f = data.fields;
+      out += `## What Was Said` + nl + nl;
+      out += `> ${safe(f['Raw thought']) || '—'}` + nl + nl;
+
+      out += `## True vs. Not True` + nl + nl;
+      out += `| What IS true | What is NOT true |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| ${safe(f['What IS true']) || '—'} | ${safe(f['What is NOT true']) || '—'} |` + nl + nl;
+
+      out += `## Reframe` + nl + nl;
+      out += `| Layer | Entry |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| Common humanity | ${safe(f['Common humanity'])} |` + nl;
+      out += `| Self-compassion | ${safe(f['Self-compassion'])} |` + nl;
+    }
+    else if (data.mode === 'Task Initiation') {
+      const f = data.fields;
+      out += `## Ignition Misfire Log` + nl + nl;
+      out += `| Field | Entry |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| The task | ${safe(f['The task'])} |` + nl;
+      out += `| Smallest first move | ${safe(f['Smallest first move'])} |` + nl;
+      out += `| Environment shift | ${safe(f['Environment shift'])} |` + nl;
+    }
+    else if (data.mode === 'Overwhelm') {
+      const f = data.fields;
+      out += `## Brain Dump` + nl + nl;
+      out += `${f['Brain dump'] || '—'}` + nl + nl;
+
+      out += `## Triaged` + nl + nl;
+      out += `| Urgent today | The ONE thing |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| ${safe(f['Urgent today']) || '—'} | ${safe(f['The ONE thing']) || '—'} |` + nl;
+    }
+    else {
+      // generic fallback
+      out += `| Field | Entry |` + nl;
+      out += `| --- | --- |` + nl;
+      for (const [k, v] of Object.entries(data.fields)) {
+        if (v && v.toString().trim()) out += `| ${safe(k)} | ${safe(v)} |` + nl;
+      }
+    }
+
+    out += nl + `---` + nl;
+    out += `_Logged from the Emergency Dashboard_`;
+    return out;
+  }
+
+  function copyForNotion(mode) {
+    const data = getEntryData(mode);
+    const text = formatForNotion(data);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        toast('Copied — paste into Memory Library');
+      }).catch(() => {
+        fallbackCopy(text);
+      });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('Copied to clipboard'); }
+    catch (e) { toast('Copy failed — try saving'); }
+    document.body.removeChild(ta);
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  function renderHistory() {
+    const entries = JSON.parse(localStorage.getItem('kyle-ed-entries') || '[]');
+    const container = document.getElementById('history-list');
+    if (entries.length === 0) {
+      container.innerHTML = '<div class="empty-state">No saved entries yet. When you use a mode and hit Save, entries land here — private to this device.</div>';
+      return;
+    }
+    container.innerHTML = entries.map((e, i) => {
+      const content = Object.entries(e.fields)
+        .filter(([k, v]) => v && v.trim())
+        .map(([k, v]) => `${k}: ${v}`)
+        .join('\n');
+      return `
+        <div class="history-item">
+          <div class="history-date">${e.date}</div>
+          <div class="history-mode">${e.mode}</div>
+          <div class="history-content">${escapeHtml(content)}</div>
+          <div style="margin-top: 10px; display: flex; gap: 8px;">
+            <button class="btn btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px;" onclick="copyHistoryItem(${i})">Copy for Notion</button>
+            <button class="btn btn-ghost" style="flex: 0 0 auto; padding: 8px 12px; font-size: 12px; color: var(--terracotta);" onclick="deleteHistoryItem(${i})">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function copyHistoryItem(idx) {
+    const entries = JSON.parse(localStorage.getItem('kyle-ed-entries') || '[]');
+    if (entries[idx]) {
+      const text = formatForNotion(entries[idx]);
+      navigator.clipboard.writeText(text).then(() => toast('Copied ✓'));
+    }
+  }
+
+  function deleteHistoryItem(idx) {
+    if (!confirm('Delete this entry?')) return;
+    const entries = JSON.parse(localStorage.getItem('kyle-ed-entries') || '[]');
+    entries.splice(idx, 1);
+    localStorage.setItem('kyle-ed-entries', JSON.stringify(entries));
+    renderHistory();
+    toast('Deleted');
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // ============ 2-MIN TIMER (ignition mode) ============
+  let ig2Interval = null;
+  function start2MinTimer() {
+    const btn = document.getElementById('ig-timer-btn');
+    const display = document.getElementById('ig-timer-display');
+    let sec = 120;
+    display.style.display = 'block';
+    btn.style.display = 'none';
+
+    function tick() {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      display.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+      if (sec <= 0) {
+        clearInterval(ig2Interval);
+        display.textContent = '✓ You started.';
+        btn.textContent = 'Restart';
+        btn.style.display = 'block';
+        return;
+      }
+      sec--;
+    }
+    tick();
+    ig2Interval = setInterval(tick, 1000);
+  }
+
+  // ============ INIT ============
+  startBreathingTimer();
+</script>
+</body>
+</html>

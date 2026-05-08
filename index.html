@@ -690,7 +690,7 @@
   <button id="skip-btn" class="breath-skip" onclick="showHome()">I'm regulated — continue →</button>
 
   <div class="breath-note">
-    Inhale 4, exhale 6. The long exhale activates your parasympathetic nervous system — this is biology, not willpower.
+    Inhale 4, hold 4, exhale 6. The long exhale activates your parasympathetic nervous system — this is biology, not willpower.
   </div>
 </div>
 
@@ -710,6 +710,15 @@
       <div class="mode-body">
         <div class="mode-title">RSD Spiral</div>
         <div class="mode-desc">Keith is in the room — walk him out</div>
+      </div>
+      <div class="mode-arrow">→</div>
+    </button>
+
+    <button class="mode-card" onclick="showMode('anger')">
+      <div class="mode-icon">🔥</div>
+      <div class="mode-body">
+        <div class="mode-title">Anger / Heat Rising</div>
+        <div class="mode-desc">Walk it out before you act it out</div>
       </div>
       <div class="mode-arrow">→</div>
     </button>
@@ -827,6 +836,93 @@
   <div class="action-row">
     <button class="btn btn-primary" onclick="saveEntry('rsd')">Save Locally</button>
     <button class="btn btn-secondary" onclick="copyForNotion('rsd')">Copy for Notion</button>
+    <button class="btn btn-ghost" onclick="showHome()">Back</button>
+  </div>
+</div>
+
+<!-- ============ ANGER MODE ============ -->
+<div id="anger-screen" class="screen">
+  <div class="mode-header">
+    <button class="back-btn" onclick="showHome()">←</button>
+    <h2 class="mode-heading">Heat <em>Rising</em></h2>
+  </div>
+
+  <div class="step-card">
+    <div class="complete-card" style="margin: 0;">
+      <h3>The fire is fast.</h3>
+      <p>ADHD anger arrives in seconds — full volume, no warning. The goal isn't to suppress it. It's to add <em>space</em> between the feeling and the action so you don't say or send something the calmer version of you will pay for tomorrow.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">1</span><span class="step-title-text">Pause & cool the body</span></div>
+    <p class="step-prompt">Physical first, words later. Cold and movement work fastest for ADHD nervous systems — they hit the vagus nerve directly, no thinking required.</p>
+    <div class="pill-row">
+      <button class="pill" onclick="togglePill(this)">Stepped out of the room</button>
+      <button class="pill" onclick="togglePill(this)">Cold water on face</button>
+      <button class="pill" onclick="togglePill(this)">Ice in my hand</button>
+      <button class="pill" onclick="togglePill(this)">Walked outside</button>
+      <button class="pill" onclick="togglePill(this)">Long exhales (6+ count)</button>
+      <button class="pill" onclick="togglePill(this)">Headphones on</button>
+      <button class="pill" onclick="togglePill(this)">Pushed against a wall</button>
+    </div>
+    <textarea id="ang-body" placeholder="Or: what I did with my body to cool down..." rows="2" style="margin-top: 10px;"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">2</span><span class="step-title-text">Name what's really underneath</span></div>
+    <p class="step-prompt">Anger is the bouncer at the door. Something else is what actually walked in. Naming it shrinks it.</p>
+    <div class="pill-row">
+      <button class="pill" onclick="togglePill(this)">Hurt</button>
+      <button class="pill" onclick="togglePill(this)">Disrespected</button>
+      <button class="pill" onclick="togglePill(this)">Embarrassed</button>
+      <button class="pill" onclick="togglePill(this)">Scared</button>
+      <button class="pill" onclick="togglePill(this)">Powerless</button>
+      <button class="pill" onclick="togglePill(this)">Overstimulated</button>
+      <button class="pill" onclick="togglePill(this)">Unheard</button>
+      <button class="pill" onclick="togglePill(this)">Tired / Hungry</button>
+      <button class="pill" onclick="togglePill(this)">An unmet need</button>
+    </div>
+    <textarea id="ang-under" placeholder="What I'm actually feeling underneath the heat..." rows="2" style="margin-top: 10px;"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">3</span><span class="step-title-text">Story vs. facts</span></div>
+    <p class="step-prompt">Right now, anger is writing the story. Get it on the page — then sort what you're <em>assuming</em> from what you actually <em>observed</em>.</p>
+    <div class="twocol tri">
+      <div>
+        <label>The story I'm telling myself</label>
+        <textarea id="ang-story" placeholder="They did this because... / This means..." rows="3"></textarea>
+      </div>
+      <div>
+        <label>What actually happened — facts only</label>
+        <textarea id="ang-facts" placeholder="Observable, not assumed..." rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">4</span><span class="step-title-text">Delay the response</span></div>
+    <p class="step-prompt">ADHD makes anger fast. The version of you 30 minutes from now will thank the version of you right now for not firing back.</p>
+    <div class="pill-row">
+      <button class="pill" onclick="togglePill(this)">Won't text/call yet</button>
+      <button class="pill" onclick="togglePill(this)">Won't reply to email yet</button>
+      <button class="pill" onclick="togglePill(this)">Will sleep on it</button>
+      <button class="pill" onclick="togglePill(this)">Will talk to Jyselle first</button>
+      <button class="pill" onclick="togglePill(this)">Won't post anything</button>
+    </div>
+    <textarea id="ang-delay" placeholder="Draft what I would've said — but won't (yet)..." rows="3" style="margin-top: 10px;"></textarea>
+  </div>
+
+  <div class="step-card">
+    <div class="step-title"><span class="step-number">5</span><span class="step-title-text">One grounded next move</span></div>
+    <p class="step-prompt">Not the response. Just the next 10 minutes — something that brings you back to yourself.</p>
+    <textarea id="ang-next" placeholder="The next 10 minutes I'll..." rows="2"></textarea>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-primary" onclick="saveEntry('anger')">Save Locally</button>
+    <button class="btn btn-secondary" onclick="copyForNotion('anger')">Copy for Notion</button>
     <button class="btn btn-ghost" onclick="showHome()">Back</button>
   </div>
 </div>
@@ -1054,9 +1150,8 @@
 
   const phases = [
     { label: 'Breathe in', cls: 'inhale', duration: 4000 },
-    { label: 'Hold', cls: 'hold', duration: 1000 },
-    { label: 'Breathe out', cls: 'exhale', duration: 6000 },
-    { label: 'Rest', cls: 'hold', duration: 1000 }
+    { label: 'Hold', cls: 'hold', duration: 4000 },
+    { label: 'Breathe out', cls: 'exhale', duration: 6000 }
   ];
   let phaseIdx = 0;
 
@@ -1072,7 +1167,15 @@
   }
 
   function startBreathingTimer() {
-    runBreathPhase();
+    const circle = document.getElementById('breath-circle');
+    if (circle) {
+      // Reset to base scale and force a reflow so the first transition actually fires
+      // (without this, the browser may batch the class change into the initial paint
+      // and skip animating from 0.75 → 1.3 on the very first inhale).
+      circle.className = 'breath-circle';
+      void circle.offsetWidth;
+    }
+    requestAnimationFrame(() => requestAnimationFrame(runBreathPhase));
     breathTimer = setInterval(() => {
       breathSeconds--;
       const countEl = document.getElementById('breath-count');
@@ -1138,6 +1241,7 @@
   function getEntryData(mode) {
     const modeLabels = {
       rsd: 'RSD Spiral',
+      anger: 'Anger / Heat Rising',
       decision: 'Decision Paralysis',
       critic: 'Self-Criticism',
       ignition: 'Task Initiation',
@@ -1160,6 +1264,16 @@
       data.fields['Contradicts it'] = document.getElementById('rsd-against').value;
       data.fields['Friend reframe'] = document.getElementById('rsd-friend').value;
       data.fields['Next action'] = document.getElementById('rsd-action').value;
+    } else if (mode === 'anger') {
+      const body = collectPills(screen.querySelectorAll('.step-card')[1]);
+      const under = collectPills(screen.querySelectorAll('.step-card')[2]);
+      const delay = collectPills(screen.querySelectorAll('.step-card')[4]);
+      data.fields['Body reset'] = [...body, document.getElementById('ang-body').value].filter(Boolean).join(' | ');
+      data.fields['Under the anger'] = [...under, document.getElementById('ang-under').value].filter(Boolean).join(' | ');
+      data.fields['The story'] = document.getElementById('ang-story').value;
+      data.fields['The facts'] = document.getElementById('ang-facts').value;
+      data.fields['Holding off'] = [...delay, document.getElementById('ang-delay').value].filter(Boolean).join(' | ');
+      data.fields['Next 10 minutes'] = document.getElementById('ang-next').value;
     } else if (mode === 'decision') {
       data.fields['The decision'] = document.getElementById('dec-question').value;
       data.fields['Pros'] = document.getElementById('dec-pros').value;
@@ -1220,6 +1334,24 @@
       out += `| How loud is Keith | ${safe(f['Belief %'])} |` + nl;
       out += `| Friend reframe | ${safe(f['Friend reframe'])} |` + nl;
       out += `| Walk-him-out action | ${safe(f['Next action'])} |` + nl;
+    }
+    else if (data.mode === 'Anger / Heat Rising') {
+      const f = data.fields;
+      out += `## What's Under the Heat` + nl + nl;
+      out += `| Body reset | What's underneath |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| ${safe(f['Body reset']) || '—'} | ${safe(f['Under the anger']) || '—'} |` + nl + nl;
+
+      out += `## The Story vs. The Facts` + nl + nl;
+      out += `| The story I told | What actually happened |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| ${safe(f['The story']) || '—'} | ${safe(f['The facts']) || '—'} |` + nl + nl;
+
+      out += `## What I'm Doing With It` + nl + nl;
+      out += `| Field | Entry |` + nl;
+      out += `| --- | --- |` + nl;
+      out += `| Holding off on | ${safe(f['Holding off'])} |` + nl;
+      out += `| **Next 10 minutes** | **${safe(f['Next 10 minutes'])}** |` + nl;
     }
     else if (data.mode === 'Decision Paralysis') {
       const f = data.fields;
